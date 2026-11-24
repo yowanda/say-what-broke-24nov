@@ -17,11 +17,18 @@ LINE = (
 
 
 def main() -> None:
+    # Runtime validation: the error line must be exactly one line,
+    # non-empty, and at most 200 characters.
+    assert LINE, "error line must not be empty"
+    assert "\n" not in LINE and "\r" not in LINE, "error line must be a single line"
+    assert len(LINE) <= 200, "error line must be at most 200 characters"
     out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR") or "/output"
     os.makedirs(out_dir, exist_ok=True)
     path = os.path.join(out_dir, "entry.txt")
-    with open(path, "w", encoding="utf-8", newline="\n") as f:
-        f.write(LINE + "\n")
+    # Deterministic byte write: exact bytes, no timestamps or randomness.
+    payload = (LINE + "\n").encode("utf-8")
+    with open(path, "wb") as f:
+        f.write(payload)
 
 
 if __name__ == "__main__":
